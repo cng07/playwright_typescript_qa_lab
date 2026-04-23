@@ -18,7 +18,9 @@
   "homepage": "https://github.com/cng07/playwright_typescript_qa_lab#readme",
   "devDependencies": {
     "@playwright/test": "^1.59.1",
-    "@types/node": "^25.6.0"
+    "@types/node": "^25.6.0",
+    "@types/pg": "^8.20.0",
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "dotenv": "^17.4.2",
