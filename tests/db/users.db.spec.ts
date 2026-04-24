@@ -22,5 +22,5 @@ test('Verify users have required fields @smoke', async () => {
 test('Verify emails should not be null @smoke', async () => {
     const users = await queryDB('SELECT * FROM users WHERE email IS NULL');
 
-    expect(users.length).toBe(3);
+    expect(users.length).toBe(0);
 });
