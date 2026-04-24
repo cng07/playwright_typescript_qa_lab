@@ -2,6 +2,34 @@ import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 dotenv.config();
 
+const selectedEnvironment = (process.env.TEST_ENV || 'dev').toLowerCase();
+
+const baseUrls: Record<string, string | undefined> = {
+  dev: process.env.BASE_URL_DEV,
+  staging: process.env.BASE_URL_STAGING,
+  prod: process.env.BASE_URL_PROD,
+};
+
+const baseURL = baseUrls[selectedEnvironment] || process.env.BASE_URL;
+
+const readIntegerEnv = (
+  name: string,
+  fallback: number | undefined,
+  minimum: number
+) => {
+  const value = process.env[name];
+
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= minimum ? parsed : fallback;
+};
+
+const workers = readIntegerEnv('PW_WORKERS', process.env.CI ? 4 : undefined, 1);
+const retries = readIntegerEnv('PW_RETRIES', process.env.CI ? 2 : 0, 0);
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -19,10 +47,10 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 4 : undefined,
+  /* Retry count can be overridden by PW_RETRIES. */
+  retries,
+  /* Worker count can be overridden by PW_WORKERS. */
+  workers,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
     ? [
@@ -36,7 +64,7 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
     // baseURL: 'http://localhost:3000',
-    baseURL: process.env.BASE_URL,
+    baseURL,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
