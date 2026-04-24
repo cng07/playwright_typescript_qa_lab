@@ -32,6 +32,9 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
     env:
       SUPABASE_URL: ${{ secrets['SUPABASE_URL'] }}
       SUPABASE_API_KEY: ${{ secrets['SUPABASE_API_KEY'] }}
@@ -49,6 +52,9 @@ jobs:
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
 
       - name: Run Playwright tests
         env:
@@ -112,6 +118,24 @@ jobs:
 
           echo "Final command: ${command[*]}"
           "${command[@]}"
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Playwright Tests
+          path: results.xml
+          reporter: junit
+
+      - name: Generate Test Summary
+        if: always()
+        run: |
+          PASSED=$(jq '.stats.expected' results.json)
+          FAILED=$(jq '.stats.unexpected' results.json)
+
+          echo "## Playwright Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Passed: $PASSED" >> $GITHUB_STEP_SUMMARY
+          echo "- Failed: $FAILED" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Playwright HTML report
         uses: actions/upload-artifact@v4

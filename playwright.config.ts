@@ -55,8 +55,8 @@ export default defineConfig({
   reporter: process.env.CI
     ? [
       ['html', { open: 'never', outputFolder: 'playwright-report' }],
-      ['json', { outputFile: 'test-results/results.json' }],
-      ['junit', { outputFile: 'test-results/junit.xml' }],
+      ['junit', { outputFile: 'results.xml' }],
+      ['json', { outputFile: 'results.json' }],
       ['list']
     ]
     : [['html', { open: 'never' }]],
