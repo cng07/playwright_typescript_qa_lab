@@ -2,9 +2,9 @@ name: Playwright Tests
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       test_type:
@@ -13,20 +13,20 @@ on:
         default: 'all'
         type: string
       tag:
-        description: 'Optional Playwright tag filter, for example @smoke or @regression'
+        description: 'Optional Playwright tag filter, for example @smoke'
         required: false
         default: ''
         type: string
       workers:
         description: 'Number of Playwright workers'
         required: false
-        default: 3
-        type: number
+        default: '3'
+        type: string
       retries:
         description: 'Number of Playwright retries'
         required: false
-        default: 1
-        type: number
+        default: '1'
+        type: string
 
 jobs:
   test:
@@ -38,81 +38,85 @@ jobs:
       DB_URL: ${{ secrets['DB_URL'] }}
       BASE_URL: ${{ secrets['BASE_URL'] }}
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      env:
-        INPUT_TEST_TYPE: ${{ github.event.inputs.test_type || 'all' }}
-        INPUT_TAG: ${{ github.event.inputs.tag || '' }}
-        INPUT_WORKERS: ${{ github.event.inputs.workers || '3' }}
-        INPUT_RETRIES: ${{ github.event.inputs.retries || '1' }}
-      run: |
-        set -euo pipefail
+      - uses: actions/checkout@v4
 
-        export TEST_TYPE="${INPUT_TEST_TYPE}"
-        export TAG="${INPUT_TAG}"
-        export PW_WORKERS="${INPUT_WORKERS}"
-        export PW_RETRIES="${INPUT_RETRIES}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
 
-        echo "Selected test type: ${TEST_TYPE}"
-        echo "Selected tag: ${TAG:-<none>}"
-        echo "Selected workers: ${PW_WORKERS}"
-        echo "Selected retries: ${PW_RETRIES}"
+      - name: Install dependencies
+        run: npm ci
 
-        echo "Resolved BASE_URL: ${BASE_URL:-<not set>}"
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
 
-        test_paths=()
-        normalized_test_type="$(echo "${TEST_TYPE}" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+      - name: Run Playwright tests
+        env:
+          INPUT_TEST_TYPE: ${{ github.event.inputs.test_type || 'all' }}
+          INPUT_TAG: ${{ github.event.inputs.tag || '' }}
+          INPUT_WORKERS: ${{ github.event.inputs.workers || '3' }}
+          INPUT_RETRIES: ${{ github.event.inputs.retries || '1' }}
+        run: |
+          set -euo pipefail
 
-        if [[ "${normalized_test_type}" == "all" || -z "${normalized_test_type}" ]]; then
-          echo "Running all Playwright tests"
-        else
-          IFS=',' read -ra selected_types <<< "${normalized_test_type}"
-          for selected_type in "${selected_types[@]}"; do
-            case "${selected_type}" in
-              api)
-                test_paths+=("tests/api")
-                ;;
-              db)
-                test_paths+=("tests/db")
-                ;;
-              ui)
-                test_paths+=("tests/ui")
-                ;;
-              *)
-                echo "Unsupported test_type value: ${selected_type}"
-                echo "Supported values are: all, api, db, ui, or comma-separated combinations."
-                exit 1
-                ;;
-            esac
-          done
-        fi
+          export TEST_TYPE="${INPUT_TEST_TYPE}"
+          export TAG="${INPUT_TAG}"
+          export PW_WORKERS="${INPUT_WORKERS}"
+          export PW_RETRIES="${INPUT_RETRIES}"
 
-        command=(npx playwright test)
+          echo "Selected test type: ${TEST_TYPE}"
+          echo "Selected tag: ${TAG:-<none>}"
+          echo "Selected workers: ${PW_WORKERS}"
+          echo "Selected retries: ${PW_RETRIES}"
+          echo "Resolved BASE_URL: ${BASE_URL:-<not set>}"
 
-        if [[ ${#test_paths[@]} -gt 0 ]]; then
-          command+=("${test_paths[@]}")
-        fi
+          test_paths=()
+          normalized_test_type="$(echo "${TEST_TYPE}" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
 
-        if [[ -n "${TAG}" ]]; then
-          command+=(--grep "${TAG}")
-        fi
+          if [[ "${normalized_test_type}" == "all" || -z "${normalized_test_type}" ]]; then
+            echo "Running all Playwright tests"
+          else
+            IFS=',' read -ra selected_types <<< "${normalized_test_type}"
+            for selected_type in "${selected_types[@]}"; do
+              case "${selected_type}" in
+                api)
+                  test_paths+=("tests/api")
+                  ;;
+                db)
+                  test_paths+=("tests/db")
+                  ;;
+                ui)
+                  test_paths+=("tests/ui")
+                  ;;
+                *)
+                  echo "Unsupported test_type value: ${selected_type}"
+                  echo "Supported values are: all, api, db, ui, or comma-separated combinations like api,db."
+                  exit 1
+                  ;;
+              esac
+            done
+          fi
 
-        command+=(--workers="${PW_WORKERS}")
-        command+=(--retries="${PW_RETRIES}")
+          command=(npx playwright test)
 
-        echo "Final command: ${command[*]}"
-        "${command[@]}"
-    - name: Upload Playwright HTML report
-      uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+          if [[ ${#test_paths[@]} -gt 0 ]]; then
+            command+=("${test_paths[@]}")
+          fi
+
+          if [[ -n "${TAG}" ]]; then
+            command+=(--grep "${TAG}")
+          fi
+
+          command+=(--workers="${PW_WORKERS}")
+          command+=(--retries="${PW_RETRIES}")
+
+          echo "Final command: ${command[*]}"
+          "${command[@]}"
+
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
