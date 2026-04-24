@@ -125,7 +125,7 @@ jobs:
         with:
           name: Playwright Tests
           path: results.xml
-          reporter: junit
+          reporter: java-junit
 
       - name: Generate Test Summary
         if: always()
@@ -134,8 +134,8 @@ jobs:
           FAILED=$(jq '.stats.unexpected' results.json)
 
           echo "## Playwright Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "- Passed: $PASSED" >> $GITHUB_STEP_SUMMARY
-          echo "- Failed: $FAILED" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Passed: $PASSED" >> $GITHUB_STEP_SUMMARY
+          echo "- ❌ Failed: $FAILED" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Playwright HTML report
         uses: actions/upload-artifact@v4
