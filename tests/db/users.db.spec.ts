@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { queryDB } from '../../utils/dbClient';
 
-test('Verify users exist in DB', async () => {
+test('Verify users exist in DB @smoke', async () => {
     const users = await queryDB('SELECT * FROM users');
     expect(users.length).toBeGreaterThan(0);
 });
 
 
-test('Verify users have required fields', async () => {
+test('Verify users have required fields @smoke', async () => {
     const users = await queryDB('SELECT * FROM users LIMIT 1');
 
     expect(users[0]).toHaveProperty('id');
@@ -19,7 +19,7 @@ test('Verify users have required fields', async () => {
     expect(users[0]).toHaveProperty('Role');
 });
 
-test('Verify emails should not be null', async () => {
+test('Verify emails should not be null @smoke', async () => {
     const users = await queryDB('SELECT * FROM users WHERE email IS NULL');
 
     expect(users.length).toBe(0);
