@@ -56,6 +56,12 @@ export default defineConfig({
     ['html', { open: 'never' }],
     ['junit', { outputFile: 'results.xml' }],
     ['json', { outputFile: 'results.json' }],
+    ['monocart-reporter', {
+      name: 'QA Test Report',
+      outputFile: 'monocart-report/index.html',
+      charts: true,
+      embedAssets: true,
+    }],
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
