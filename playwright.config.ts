@@ -52,24 +52,22 @@ export default defineConfig({
   /* Worker count can be overridden by PW_WORKERS. */
   workers,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: process.env.CI
-    ? [
-      ['html', { open: 'never', outputFolder: 'playwright-report' }],
-      ['junit', { outputFile: 'results.xml' }],
-      ['json', { outputFile: 'results.json' }],
-      ['list']
-    ]
-    : [['html', { open: 'never' }]],
+  reporter: [
+    ['html', { open: 'never', outputFolder: 'playwright-report' }],
+    ['junit', { outputFile: 'results.xml' }],
+    ['json', { outputFile: 'results.json' }],
+    ['allure-playwright'],
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
     // baseURL: 'http://localhost:3000',
     baseURL,
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    /* Collect artifacts only for failed tests. */
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    video: process.env.CI ? 'retain-on-failure' : 'off',
+    video: 'retain-on-failure',
     headless: process.env.CI ? true : false,
     
   },
