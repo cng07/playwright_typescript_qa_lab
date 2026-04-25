@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { queryDB } from '../../utils/dbClient';
 
 test.describe('API + DB - Users', () => {
-  test('API/DB: Users API row count matches users table row count @regression', async ({ request }) => {
+  test('Integration: Users API row count matches users table row count @regression', async ({ request }) => {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseApiKey = process.env.SUPABASE_API_KEY;
 
