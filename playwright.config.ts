@@ -57,7 +57,7 @@ export default defineConfig({
     ['junit', { outputFile: 'results.xml' }],
     ['json', { outputFile: 'results.json' }],
     ['monocart-reporter', {
-      name: 'QA Lab Automation Report',
+      name: 'QA Lab Automation Report – Users Module',
       outputFile: 'monocart-report/index.html',
       charts: true,
       embedAssets: true,
@@ -73,10 +73,10 @@ export default defineConfig({
       },
 
       metadata: {
-        project: 'Playwright QA Lab',
-        module: 'Users',
-        environment: 'QA',
-        executedBy: 'GitHub Actions CI',
+        project: 'QA Automation Lab',
+        module: 'Users Service',
+        environment: process.env.TEST_ENV || 'QA Environment',
+        execution: 'GitHub Actions CI Pipeline',
       },
     }],
   ],

@@ -32,13 +32,14 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       checks: write
     env:
       SUPABASE_URL: ${{ secrets['SUPABASE_URL'] }}
       SUPABASE_API_KEY: ${{ secrets['SUPABASE_API_KEY'] }}
       DB_URL: ${{ secrets['DB_URL'] }}
       BASE_URL: ${{ secrets['BASE_URL'] }}
+      TEST_ENV: QA Environment
     steps:
       - uses: actions/checkout@v4
 
@@ -153,3 +154,11 @@ jobs:
           name: monocart-report
           path: monocart-report
           retention-days: 30
+
+      - name: Deploy Monocart Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: monocart-report
