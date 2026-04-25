@@ -57,10 +57,27 @@ export default defineConfig({
     ['junit', { outputFile: 'results.xml' }],
     ['json', { outputFile: 'results.json' }],
     ['monocart-reporter', {
-      name: 'QA Test Report',
+      name: 'QA Lab Automation Report',
       outputFile: 'monocart-report/index.html',
       charts: true,
       embedAssets: true,
+      inline: true,
+
+      // Enable trend tracking across runs
+      trend: true,
+
+      // Reduce clutter – show only essential columns
+      columns: (defaultColumns: string[]) => {
+        const included = ['title', 'status', 'duration'];
+        return defaultColumns.filter((col: string) => included.includes(col));
+      },
+
+      metadata: {
+        project: 'Playwright QA Lab',
+        module: 'Users',
+        environment: 'QA',
+        executedBy: 'GitHub Actions CI',
+      },
     }],
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -74,7 +91,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     headless: process.env.CI ? true : false,
-    
+
   },
 
   /* Configure projects for major browsers */
