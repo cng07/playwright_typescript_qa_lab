@@ -7,3 +7,18 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 .env
+
+# Monocart test reports
+monocart-report/
+*.zip
+*.md
+
+# Playwright / test results
+results.json
+results.xml
+
+# General reports
+report/
+reports/
+test-results/
+playwright-report/
