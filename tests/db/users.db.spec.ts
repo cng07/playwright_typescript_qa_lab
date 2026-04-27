@@ -23,8 +23,8 @@ test.describe('DB - Users @db', () => {
     expect(users[0]).toHaveProperty('last_name');
     expect(users[0]).toHaveProperty('email');
     expect(users[0]).toHaveProperty('created_at');
-    expect(users[0]).toHaveProperty('Nationality');
-    expect(users[0]).toHaveProperty('Role');
+    expect(users[0]).toHaveProperty('nationality');
+    expect(users[0]).toHaveProperty('role');
   });
 
   test('DB: Users table should not contain null emails @smoke @regression', async () => {
@@ -47,8 +47,8 @@ test.describe('DB - Users @db', () => {
     expect(typeof user.first_name).toBe('string');
     expect(typeof user.last_name).toBe('string');
     expect(typeof user.email).toBe('string');
-    expect(typeof user.Nationality).toBe('string');
-    expect(typeof user.Role).toBe('string');
+    expect(typeof user.nationality).toBe('string');
+    expect(typeof user.role).toBe('string');
     expect(typeof user.id).toBe('string');
 
     expect(new Date(user.created_at).toString()).not.toBe('Invalid Date');
@@ -67,8 +67,8 @@ test.describe('DB - Users @db', () => {
     expect(columns).toContain('last_name');
     expect(columns).toContain('email');
     expect(columns).toContain('created_at');
-    expect(columns).toContain('Nationality');
-    expect(columns).toContain('Role');
+    expect(columns).toContain('nationality');
+    expect(columns).toContain('role');
     expect(columns).toContain('id');
   });
 
@@ -96,9 +96,9 @@ test.describe('DB - Users @db', () => {
 
   test('DB: Roles should be valid', async () => {
     const invalidRoles = await queryDB(`
-    SELECT DISTINCT "Role" 
+    SELECT DISTINCT "role" 
     FROM users 
-    WHERE "Role" NOT IN ('Member', 'Admin', 'VIP')
+    WHERE "role" NOT IN ('Member', 'Admin', 'VIP')
   `);
 
     expect(invalidRoles.length).toBe(0);
@@ -155,11 +155,11 @@ test.describe('DB - Users @db', () => {
     const members = await queryDB(`
     SELECT * 
     FROM users 
-    WHERE "Role" = 'Member'
+    WHERE "role" = 'Member'
   `);
 
     members.forEach(user => {
-      expect(user.Role).toBe('Member');
+      expect(user.role).toBe('Member');
     });
   });
 
