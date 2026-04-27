@@ -51,18 +51,20 @@ type TrendSnapshot = TrendPoint & {
 const isTrendSummary = (value: unknown): value is TrendSummary =>
   !!value && typeof value === 'object' && !Array.isArray(value);
 
-const isTrendPoint = (value: unknown): value is TrendPoint => {
+const isTrendSnapshot = (value: unknown): value is TrendSnapshot => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return false;
   }
 
-  const trendPoint = value as Partial<TrendPoint>;
+  const trendPoint = value as Partial<TrendSnapshot>;
   return (
     typeof trendPoint.date === 'number' &&
     Number.isFinite(trendPoint.date) &&
     typeof trendPoint.duration === 'number' &&
     Number.isFinite(trendPoint.duration) &&
-    isTrendSummary(trendPoint.summary)
+    isTrendSummary(trendPoint.summary) &&
+    (trendPoint.trends === undefined ||
+      (Array.isArray(trendPoint.trends) && trendPoint.trends.every(isTrendHistoryPoint)))
   );
 };
 
@@ -93,7 +95,7 @@ const loadTrendSnapshot = (): TrendSnapshot | null => {
     }
 
     const parsed = JSON.parse(raw);
-    if (!isTrendPoint(parsed)) {
+    if (!isTrendSnapshot(parsed)) {
       return null;
     }
 
