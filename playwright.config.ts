@@ -134,7 +134,7 @@ const persistTrendSnapshot = async (reportData: TrendSnapshot) => {
 };
 
 const workers = readIntegerEnv('PW_WORKERS', process.env.CI ? 4 : undefined, 1);
-const retries = readIntegerEnv('PW_RETRIES', process.env.CI ? 2 : 0, 0);
+const retries = readIntegerEnv('PW_RETRIES', process.env.CI ? 1 : 2, 0);
 const trendSnapshot = loadTrendSnapshot();
 
 /**
