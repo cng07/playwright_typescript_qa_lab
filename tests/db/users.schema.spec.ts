@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { queryDB } from '../../utils/dbClient';
 
-test.describe('DB - Users Schema @db_schema', () => {
+test.describe('DB - Users Schema @db @db_schema', () => {
 
     test('Schema: Users table should have expected columns', async () => {
 
