@@ -3,7 +3,6 @@ import { apiRequest } from '../../../utils/apiClient';
 
 test.describe('API - Users POST @api @api_post', () => {
   test('API:POST - Users should create user', async ({ request }) => {
-    const supabaseApiKey = process.env.SUPABASE_API_KEY!;
     const email = `api_${Date.now()}@mail.com`;
 
     let userId: string | null = null;
@@ -19,10 +18,11 @@ test.describe('API - Users POST @api @api_post', () => {
           role: 'Member',
         },
         headers: {
-          apikey: supabaseApiKey,
-          Authorization: `Bearer ${supabaseApiKey}`,
+          // Previous inline defaults, now centralized in apiRequest:
+          // apikey: process.env.SUPABASE_API_KEY!,
+          // Authorization: `Bearer ${process.env.SUPABASE_API_KEY}`,
+          // 'Content-Type': 'application/json',
           Prefer: 'return=representation',
-          'Content-Type': 'application/json',
         },
       });
 
@@ -37,12 +37,12 @@ test.describe('API - Users POST @api @api_post', () => {
     } finally {
       // CLEANUP (always runs)
       if (userId) {
-        const deleteRes = await apiRequest(request, 'delete', `/rest/v1/users?id=eq.${userId}`, {
-          headers: {
-            apikey: supabaseApiKey,
-            Authorization: `Bearer ${supabaseApiKey}`,
-          },
-        });
+        // Previous inline defaults were:
+        // headers: {
+        //   apikey: process.env.SUPABASE_API_KEY!,
+        //   Authorization: `Bearer ${process.env.SUPABASE_API_KEY}`,
+        // }
+        const deleteRes = await apiRequest(request, 'delete', `/rest/v1/users?id=eq.${userId}`);
 
         expect(deleteRes.status()).toBe(204);
       }
@@ -50,7 +50,6 @@ test.describe('API - Users POST @api @api_post', () => {
   });
 
   test('API:POST - Users should fail with missing fields', async ({ request }) => {
-    const supabaseApiKey = process.env.SUPABASE_API_KEY!;
     const email = `api_incomplete_${Date.now()}@mail.com`;
 
     let userId: string | null = null;
@@ -63,9 +62,10 @@ test.describe('API - Users POST @api @api_post', () => {
           email,
         },
         headers: {
-          apikey: supabaseApiKey,
-          Authorization: `Bearer ${supabaseApiKey}`,
-          'Content-Type': 'application/json',
+          // Previous inline defaults, now centralized in apiRequest:
+          // apikey: process.env.SUPABASE_API_KEY!,
+          // Authorization: `Bearer ${process.env.SUPABASE_API_KEY}`,
+          // 'Content-Type': 'application/json',
           Prefer: 'return=representation',
         },
       });
@@ -81,12 +81,12 @@ test.describe('API - Users POST @api @api_post', () => {
     } finally {
       // CLEANUP (always runs)
       if (userId) {
-        const deleteRes = await apiRequest(request, 'delete', `/rest/v1/users?id=eq.${userId}`, {
-          headers: {
-            apikey: supabaseApiKey,
-            Authorization: `Bearer ${supabaseApiKey}`,
-          },
-        });
+        // Previous inline defaults were:
+        // headers: {
+        //   apikey: process.env.SUPABASE_API_KEY!,
+        //   Authorization: `Bearer ${process.env.SUPABASE_API_KEY}`,
+        // }
+        const deleteRes = await apiRequest(request, 'delete', `/rest/v1/users?id=eq.${userId}`);
 
         expect(deleteRes.status()).toBe(204);
       }

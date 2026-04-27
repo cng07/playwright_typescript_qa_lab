@@ -7,15 +7,18 @@ export async function apiRequest(
   options: any = {},
 ) {
   const supabaseUrl = process.env.SUPABASE_URL!;
-  const apiKey = process.env.SUPABASE_API_KEY!;
+  const defaultHeaders = {
+    apikey: process.env.SUPABASE_API_KEY!,
+    Authorization: `Bearer ${process.env.SUPABASE_API_KEY}`,
+    'Content-Type': 'application/json',
+  };
+  const { headers, ...requestOptions } = options;
 
   return request[method](`${supabaseUrl}${endpoint}`, {
+    ...requestOptions,
     headers: {
-      apikey: apiKey,
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
+      ...defaultHeaders,
+      ...(headers || {}),
     },
-    ...options,
   });
 }
