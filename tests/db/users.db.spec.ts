@@ -61,7 +61,7 @@ test.describe('DB - Users @db', () => {
     WHERE table_name = 'users'
     `);
 
-    const columns = result.map(c => c.column_name);
+    const columns = result.map((c) => c.column_name);
 
     expect(columns).toContain('first_name');
     expect(columns).toContain('last_name');
@@ -158,7 +158,7 @@ test.describe('DB - Users @db', () => {
     WHERE "role" = 'Member'
   `);
 
-    members.forEach(user => {
+    members.forEach((user) => {
       expect(user.role).toBe('Member');
     });
   });
@@ -169,8 +169,9 @@ test.describe('DB - Users @db', () => {
   `);
 
     for (let i = 1; i < users.length; i++) {
-      expect(new Date(users[i - 1].created_at).getTime())
-        .toBeGreaterThanOrEqual(new Date(users[i].created_at).getTime());
+      expect(new Date(users[i - 1].created_at).getTime()).toBeGreaterThanOrEqual(
+        new Date(users[i].created_at).getTime(),
+      );
     }
   });
 
@@ -191,8 +192,7 @@ test.describe('DB - Users @db', () => {
     WHERE tablename = 'users'
   `);
 
-    const hasEmailIndex = indexes.some(i => i.indexname.includes('email'));
+    const hasEmailIndex = indexes.some((i) => i.indexname.includes('email'));
     expect(hasEmailIndex).toBe(true);
   });
-
 });
