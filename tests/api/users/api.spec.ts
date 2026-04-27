@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('API - Users', () => {
-  test('API: GET /users returns 200 and a valid JSON array @smoke @regression', async ({
+  test('API: GET - Users returns 200 and a valid JSON array @smoke @regression', async ({
     request,
   }) => {
     const supabaseUrl = process.env.SUPABASE_URL;
