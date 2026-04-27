@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { apiRequest } from '../../../utils/apiClient';
 
-test.describe('API - Users GET', () => {
+test.describe('API - Users GET @api @api_get', () => {
   test('API: GET - Users should return 200 and array', async ({ request }) => {
     const res = await apiRequest(request, 'get', '/rest/v1/users');
 

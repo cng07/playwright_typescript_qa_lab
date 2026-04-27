@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { apiRequest } from '../../../utils/apiClient';
 
-test.describe('API - Users DELETE', () => {
+test.describe('API - Users DELETE @api @api_delete', () => {
   test('API: DELETE - Users should remove user', async ({ request }) => {
     const email = `delete_${Date.now()}@mail.com`;
 

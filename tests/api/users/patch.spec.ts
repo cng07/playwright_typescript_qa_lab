@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { apiRequest } from '../../../utils/apiClient';
 
-test.describe('API - Users PATCH', () => {
+test.describe('API - Users PATCH @api @api_patch', () => {
   test('API: PATCH - Users should update role', async ({ request }) => {
     const email = `patch_${Date.now()}@mail.com`;
 
