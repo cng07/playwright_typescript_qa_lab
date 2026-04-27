@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "test": "npx playwright test",
+    "posttest": "node scripts/trim-trend.js",
     "format": "prettier . --write",
     "format:check": "prettier . --check"
   },

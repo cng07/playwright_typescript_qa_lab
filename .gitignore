@@ -1,7 +1,7 @@
-
 # Playwright
 node_modules/
 /test-results/
+/trend-data/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
@@ -22,3 +22,4 @@ report/
 reports/
 test-results/
 playwright-report/
+trend-data/

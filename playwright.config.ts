@@ -1,6 +1,13 @@
+import fs from 'fs';
+import path from 'path';
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
+
 dotenv.config();
+
+const MONOCART_REPORT_FILE = './test-results/report.html';
+const TREND_DATA_FILE = './trend-data/trend.json';
+const MAX_TREND_RUNS = 5;
 
 const selectedEnvironment = (process.env.TEST_ENV || 'dev').toLowerCase();
 
@@ -12,11 +19,7 @@ const baseUrls: Record<string, string | undefined> = {
 
 const baseURL = baseUrls[selectedEnvironment] || process.env.BASE_URL;
 
-const readIntegerEnv = (
-  name: string,
-  fallback: number | undefined,
-  minimum: number
-) => {
+const readIntegerEnv = (name: string, fallback: number | undefined, minimum: number) => {
   const value = process.env[name];
 
   if (!value) {
@@ -27,74 +30,157 @@ const readIntegerEnv = (
   return Number.isInteger(parsed) && parsed >= minimum ? parsed : fallback;
 };
 
+type TrendSummary = Record<string, unknown>;
+
+type TrendPoint = {
+  date: number;
+  duration: number;
+  summary: TrendSummary;
+};
+
+type TrendHistoryPoint = {
+  date: number;
+  duration: number;
+  [key: string]: unknown;
+};
+
+type TrendSnapshot = TrendPoint & {
+  trends?: TrendHistoryPoint[];
+};
+
+const isTrendSummary = (value: unknown): value is TrendSummary =>
+  !!value && typeof value === 'object' && !Array.isArray(value);
+
+const isTrendPoint = (value: unknown): value is TrendPoint => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  const trendPoint = value as Partial<TrendPoint>;
+  return (
+    typeof trendPoint.date === 'number' &&
+    Number.isFinite(trendPoint.date) &&
+    typeof trendPoint.duration === 'number' &&
+    Number.isFinite(trendPoint.duration) &&
+    isTrendSummary(trendPoint.summary)
+  );
+};
+
+const isTrendHistoryPoint = (value: unknown): value is TrendHistoryPoint => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  const trendPoint = value as Partial<TrendHistoryPoint>;
+  return (
+    typeof trendPoint.date === 'number' &&
+    Number.isFinite(trendPoint.date) &&
+    typeof trendPoint.duration === 'number' &&
+    Number.isFinite(trendPoint.duration)
+  );
+};
+
+const loadTrendSnapshot = (): TrendSnapshot | null => {
+  try {
+    const trendFilePath = path.resolve(TREND_DATA_FILE);
+    if (!fs.existsSync(trendFilePath)) {
+      return null;
+    }
+
+    const raw = fs.readFileSync(trendFilePath, 'utf8').trim();
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!isTrendPoint(parsed)) {
+      return null;
+    }
+
+    const history = Array.isArray(parsed.trends) ? parsed.trends.filter(isTrendHistoryPoint) : [];
+
+    return {
+      ...parsed,
+      trends: history.slice(-(MAX_TREND_RUNS - 1)),
+    };
+  } catch {
+    // A bad trend file should never block the test run.
+    return null;
+  }
+};
+
+const persistTrendSnapshot = async (reportData: TrendSnapshot) => {
+  const trendFilePath = path.resolve(TREND_DATA_FILE);
+  const trendDirectory = path.dirname(trendFilePath);
+  const history = Array.isArray(reportData.trends)
+    ? reportData.trends.filter(isTrendHistoryPoint)
+    : [];
+
+  const snapshot: TrendSnapshot = {
+    date: reportData.date,
+    duration: reportData.duration,
+    summary: reportData.summary,
+    // reportData.trends already contains only historical points from earlier runs.
+    trends: history.slice(-(MAX_TREND_RUNS - 1)),
+  };
+
+  const tempFilePath = `${trendFilePath}.tmp`;
+  await fs.promises.mkdir(trendDirectory, { recursive: true });
+  await fs.promises.writeFile(tempFilePath, `${JSON.stringify(snapshot, null, 2)}\n`, 'utf8');
+  await fs.promises.rm(trendFilePath, { force: true });
+  await fs.promises.rename(tempFilePath, trendFilePath);
+};
+
 const workers = readIntegerEnv('PW_WORKERS', process.env.CI ? 4 : undefined, 1);
 const retries = readIntegerEnv('PW_RETRIES', process.env.CI ? 2 : 0, 0);
-
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+const trendSnapshot = loadTrendSnapshot();
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
   testDir: './tests',
-  /* Run tests in files in parallel */
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry count can be overridden by PW_RETRIES. */
   retries,
-  /* Worker count can be overridden by PW_WORKERS. */
   workers,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html', { open: 'never' }],
     ['junit', { outputFile: 'results.xml' }],
     ['json', { outputFile: 'results.json' }],
-    ['monocart-reporter', {
-      name: 'QA Lab Automation Report – Users Module',
-      outputFile: 'monocart-report/index.html',
-      charts: true,
-      embedAssets: true,
-      inline: true,
-
-      // Enable trend tracking across runs
-      trend: true,
-
-      // Reduce clutter – show only essential columns
-      columns: (defaultColumns: string[]) => {
-        const included = ['title', 'status', 'duration'];
-        return defaultColumns.filter((col: string) => included.includes(col));
+    [
+      'monocart-reporter',
+      {
+        name: 'QA Lab Automation Report - Users Module',
+        outputFile: MONOCART_REPORT_FILE,
+        charts: true,
+        embedAssets: true,
+        inline: true,
+        // Store the trend input outside test-results because Playwright cleans that directory.
+        trend: trendSnapshot,
+        columns: (defaultColumns: string[]) => {
+          const included = ['title', 'status', 'duration'];
+          return defaultColumns.filter((col: string) => included.includes(col));
+        },
+        metadata: {
+          project: 'QA Automation Lab',
+          module: 'Users Service',
+          environment: process.env.TEST_ENV || 'QA Environment',
+          execution: process.env.CI ? 'GitHub Actions CI Pipeline' : 'Local Execution',
+        },
+        onEnd: async (reportData: TrendSnapshot) => {
+          await persistTrendSnapshot(reportData);
+        },
       },
-
-      metadata: {
-        project: 'QA Automation Lab',
-        module: 'Users Service',
-        environment: process.env.TEST_ENV || 'QA Environment',
-        execution: 'GitHub Actions CI Pipeline',
-      },
-    }],
+    ],
   ],
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
-    // baseURL: 'http://localhost:3000',
     baseURL,
-
-    /* Collect artifacts only for failed tests. */
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     headless: process.env.CI ? true : false,
-
   },
-
-  /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
@@ -111,7 +197,6 @@ export default defineConfig({
     //   use: { ...devices['Desktop Safari'] },
     // },
 
-    /* Test against mobile viewports. */
     // {
     //   name: 'Mobile Chrome',
     //   use: { ...devices['Pixel 5'] },
@@ -121,7 +206,6 @@ export default defineConfig({
     //   use: { ...devices['iPhone 12'] },
     // },
 
-    /* Test against branded browsers. */
     // {
     //   name: 'Microsoft Edge',
     //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
@@ -132,7 +216,6 @@ export default defineConfig({
     // },
   ],
 
-  /* Run your local dev server before starting the tests */
   // webServer: {
   //   command: 'npm run start',
   //   url: 'http://localhost:3000',
