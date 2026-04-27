@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { queryDB } from '../../utils/dbClient';
-import { createTestUser, deleteTestUser } from '../../utils/factories/userFactory';
+import { queryDB } from '../../../utils/dbClient';
+import { createTestUser, deleteTestUser } from '../../../utils/factories/userFactory';
 
 test.describe('DB - Users CRUD (Factory) @db @db_crudFactory', () => {
   let user: any;

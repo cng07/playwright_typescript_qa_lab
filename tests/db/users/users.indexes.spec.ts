@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { queryDB } from '../../utils/dbClient';
+import { queryDB } from '../../../utils/dbClient';
 
 test.describe('DB - Users Indexes @db @db_indexes', () => {
   test('Index: Users table should have a primary key index on id', async () => {

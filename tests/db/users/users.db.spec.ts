@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { queryDB } from '../../utils/dbClient';
+import { queryDB } from '../../../utils/dbClient';
 
 test.describe('DB - Users @db', () => {
   test('DB: Users table contains at least one record @smoke', async () => {

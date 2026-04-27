@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { queryDB } from '../../utils/dbClient';
+import { queryDB } from '../../../utils/dbClient';
 
 test.describe('DB - Users Constraints @db @db_constraints', () => {
   test('Constraint: Emails should be unique', async () => {

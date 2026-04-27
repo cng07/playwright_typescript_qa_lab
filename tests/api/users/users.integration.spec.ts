@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { queryDB } from '../../utils/dbClient';
+import { queryDB } from '../../../utils/dbClient';
 
 test.describe('API + DB - Users', () => {
   test('Integration: Users API row count matches users table row count @regression', async ({
