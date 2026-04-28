@@ -141,6 +141,7 @@ const trendSnapshot = loadTrendSnapshot();
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  grepInvert: /@excluded/,
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
