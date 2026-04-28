@@ -52,44 +52,26 @@ test.describe('API - Users POST @api @api_post', () => {
   test('API:POST - Users should fail with missing fields', async ({ request }) => {
     const email = `api_incomplete_${Date.now()}@mail.com`;
 
-    let userId: string | null = null;
+    // let userId: string | null = null;
 
-    try {
-      // CREATE (currently succeeds due to schema)
-      const res = await apiRequest(request, 'post', '/rest/v1/users', {
-        data: {
-          first_name: 'Incomplete',
-          email,
-        },
-        headers: {
-          // Previous inline defaults, now centralized in apiRequest:
-          // apikey: process.env.SUPABASE_API_KEY!,
-          // Authorization: `Bearer ${process.env.SUPABASE_API_KEY}`,
-          // 'Content-Type': 'application/json',
-          Prefer: 'return=representation',
-        },
-      });
+    // CREATE (currently succeeds due to schema)
+    const res = await apiRequest(request, 'post', '/rest/v1/users', {
+      data: {
+        first_name: 'Incomplete',
+        email,
+      },
+      headers: {
+        // Previous inline defaults, now centralized in apiRequest:
+        // apikey: process.env.SUPABASE_API_KEY!,
+        // Authorization: `Bearer ${process.env.SUPABASE_API_KEY}`,
+        // 'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+      },
+    });
 
-      expect(res.status()).toBe(201);
+    expect(res.status()).toBeGreaterThanOrEqual(400);
 
-      const data = await res.json();
-      const user = data[0];
-
-      userId = user.id;
-
-      expect(user.first_name).toBe('Incomplete');
-    } finally {
-      // CLEANUP (always runs)
-      if (userId) {
-        // Previous inline defaults were:
-        // headers: {
-        //   apikey: process.env.SUPABASE_API_KEY!,
-        //   Authorization: `Bearer ${process.env.SUPABASE_API_KEY}`,
-        // }
-        const deleteRes = await apiRequest(request, 'delete', `/rest/v1/users?id=eq.${userId}`);
-
-        expect(deleteRes.status()).toBe(204);
-      }
-    }
+    const body = await res.json();
+    expect(body).toHaveProperty('message');
   });
 });
