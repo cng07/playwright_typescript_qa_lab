@@ -14,8 +14,8 @@
 ```
 Error: expect(received).toBe(expected) // Object.is equality
 
-Expected: 8
-Received: 7
+Expected: 6
+Received: 5
 ```
 
 # Test source
