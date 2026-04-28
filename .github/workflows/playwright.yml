@@ -170,6 +170,17 @@ jobs:
           path: test-results
           retention-days: 30
 
+      - name: Prepare GitHub Pages entrypoint
+        if: always()
+        run: |
+          if [ -f test-results/report.html ]; then
+            cp test-results/report.html test-results/index.html
+            touch test-results/.nojekyll
+          else
+            echo "Expected report file test-results/report.html was not found."
+            exit 1
+          fi
+
       - name: Deploy Monocart Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: always()
