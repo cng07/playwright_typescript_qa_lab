@@ -3,6 +3,7 @@ import { apiRequest } from '../../../utils/apiClient';
 import { queryDB } from '../../../utils/dbClient';
 
 test.describe('API + DB - Users', () => {
+  test.describe.configure({ mode: 'serial' });
   test('Integration: Users API row count matches users table row count @regression', async ({
     request,
   }) => {
