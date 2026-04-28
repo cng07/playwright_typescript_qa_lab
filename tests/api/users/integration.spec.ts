@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { apiRequest } from '../../../utils/apiClient';
 import { queryDB } from '../../../utils/dbClient';
 
 test.describe('API + DB - Users', () => {
+  test.describe.configure({ mode: 'serial' });
   test('Integration: Users API row count matches users table row count @regression', async ({
     request,
   }) => {
@@ -11,12 +13,13 @@ test.describe('API + DB - Users', () => {
     expect(supabaseUrl, 'SUPABASE_URL must be defined').toBeTruthy();
     expect(supabaseApiKey, 'SUPABASE_API_KEY must be defined').toBeTruthy();
 
-    const apiRes = await request.get(`${supabaseUrl}/rest/v1/users`, {
-      headers: {
-        apikey: supabaseApiKey!,
-        Authorization: `Bearer ${supabaseApiKey!}`,
-      },
-    });
+    // const apiRes = await request.get(`${supabaseUrl}/rest/v1/users`, {
+    //   headers: {
+    //     apikey: supabaseApiKey!,
+    //     Authorization: `Bearer ${supabaseApiKey!}`,
+    //   },
+    // });
+    const apiRes = await apiRequest(request, 'get', '/rest/v1/users');
 
     expect(apiRes.status()).toBe(200);
     expect(apiRes.headers()['content-type'] || '').toContain('application/json');

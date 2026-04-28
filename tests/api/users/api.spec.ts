@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { apiRequest } from '../../../utils/apiClient';
 
 test.describe('API - Users', () => {
-  test('API: GET /users returns 200 and a valid JSON array @smoke @regression', async ({
+  test('API: GET - Users returns 200 and a valid JSON array @smoke @regression', async ({
     request,
   }) => {
     const supabaseUrl = process.env.SUPABASE_URL;
@@ -10,12 +11,13 @@ test.describe('API - Users', () => {
     expect(supabaseUrl, 'SUPABASE_URL must be defined').toBeTruthy();
     expect(supabaseApiKey, 'SUPABASE_API_KEY must be defined').toBeTruthy();
 
-    const res = await request.get(`${supabaseUrl}/rest/v1/users`, {
-      headers: {
-        apikey: supabaseApiKey!,
-        Authorization: `Bearer ${supabaseApiKey!}`,
-      },
-    });
+    // const res = await request.get(`${supabaseUrl}/rest/v1/users`, {
+    // headers: {
+    //   apikey: supabaseApiKey!,
+    //   Authorization: `Bearer ${supabaseApiKey!}`,
+    //  }
+    // });
+    const res = await apiRequest(request, 'get', '/rest/v1/users');
     const contentType = res.headers()['content-type'] || '';
     const bodyText = await res.text();
 
