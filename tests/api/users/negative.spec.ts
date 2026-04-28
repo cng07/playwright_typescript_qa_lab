@@ -23,23 +23,32 @@ test.describe('API - Users NEGATIVE @api @api_negative', () => {
   });
 
   test('API: POST invalid email (cleanup if inserted)', async ({ request }) => {
-    const email = `invalid_${Date.now()}@mail.com`;
-    createdEmails.push(email);
+    const invalidEmail = 'invalid-email';
+
+    let createdId: string | null = null;
 
     const res = await apiRequest(request, 'post', '/rest/v1/users', {
       data: {
         first_name: 'Bad',
         last_name: 'Email',
-        email: 'invalid-email', // intentionally bad
+        email: invalidEmail,
         nationality: 'Filipino',
         role: 'Member',
       },
       headers: { Prefer: 'return=representation' },
     });
 
-    // If system is strict → 400
-    // If system is weak → 201 (and inserts)
     expect([201, 400]).toContain(res.status());
+
+    // If inserted → capture ID
+    if (res.status() === 201) {
+      const body = await res.json();
+      createdId = body?.[0]?.id;
+
+      if (createdId) {
+        await apiRequest(request, 'delete', `/rest/v1/users?id=eq.${createdId}`);
+      }
+    }
   });
 
   test('API: POST invalid role (cleanup if inserted)', async ({ request }) => {
