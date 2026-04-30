@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { apiRequest } from '../../../utils/apiClient';
 import { queryDB } from '../../../utils/dbClient';
 
-test.describe('API + DB - Users', () => {
+test.describe('Integration: API + DB - Users @integration', () => {
   test.describe.configure({ mode: 'serial' });
   test('Integration: Users API row count matches users table row count @excluded', async ({
     request,
