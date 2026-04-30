@@ -74,6 +74,7 @@ Create `.env` in the project root:
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_API_KEY=your-supabase-key
 DB_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE
+DB_SSL=true
 BASE_URL=https://your-app-url.com
 ```
 
@@ -89,6 +90,8 @@ PW_RETRIES=1
 ```
 
 `TEST_ENV` selects `BASE_URL_DEV`, `BASE_URL_STAGING`, or `BASE_URL_PROD`. If no environment-specific URL matches, Playwright falls back to `BASE_URL`.
+
+Database TLS verification is enabled by default. If the server presents a self-signed chain and you have not set an SSL override, the DB helper retries once with certificate verification disabled for compatibility. Set `DB_SSL_REJECT_UNAUTHORIZED=false` explicitly if you want that behavior to be permanent, or `DB_SSL=true` / `DB_SSL_REJECT_UNAUTHORIZED=true` if you want strict verification only.
 
 ## Running Tests
 
@@ -174,6 +177,8 @@ Pipeline flow:
 | `SUPABASE_URL` | Yes | Base URL for Supabase REST calls |
 | `SUPABASE_API_KEY` | Yes | Supabase API key used by API tests/helpers |
 | `DB_URL` | Yes | PostgreSQL connection string for direct DB access |
+| `DB_SSL` | No | Set to `false` to disable SSL entirely for local PostgreSQL |
+| `DB_SSL_REJECT_UNAUTHORIZED` | No | Defaults to `true`; set to `false` only for self-signed/local DB certificates |
 | `BASE_URL` | Yes for UI tests unless env-specific URL is used | Default application base URL |
 | `BASE_URL_DEV` | No | Base URL used when `TEST_ENV=dev` |
 | `BASE_URL_STAGING` | No | Base URL used when `TEST_ENV=staging` |
